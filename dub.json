@@ -1,0 +1,9 @@
+{
+    "name": "dfontview",
+    "targetName": "dfontview",
+    "targetType": "executable",
+    "targetPath": "bin",
+    "dependencies": {
+        "dlangui": "~>0.9.99"
+    }
+}

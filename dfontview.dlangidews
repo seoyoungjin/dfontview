@@ -1,0 +1,9 @@
+{
+    "name": "dfontview",
+    "description": null,
+    "projects": {
+        "dfontview": "dub.json"
+    },
+    "includePath": {
+    }
+}
