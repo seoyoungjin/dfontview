@@ -3,6 +3,12 @@
     "targetName": "dfontview",
     "targetType": "executable",
     "targetPath": "bin",
+
+    "subPackages": [
+        "./examples/canvas/",
+        "./examples/fontlist/"
+    ],
+
     "dependencies": {
         "dlangui": "~>0.9.99"
     }
