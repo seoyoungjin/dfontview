@@ -1,0 +1,28 @@
+{
+    "name": "canvas",
+
+    "targetPath": "bin",
+    "targetName": "canvas",
+    "targetType": "executable",
+
+    "excludedSourceFiles": ["src/canvas2.d"],
+
+    "dependencies": {
+        "dlangui": "~>0.9.99"
+    },
+
+    "configurations" : [
+        {
+            "name" : "default",
+            "subConfigurations" : {
+                "dlangui" : "minimal"
+            }
+        }, 
+        {
+            "name" : "console",
+            "subConfigurations" : {
+                "dlangui" : "console"
+            }
+        }
+    ]
+}
