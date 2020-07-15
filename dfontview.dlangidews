@@ -1,9 +1,11 @@
 {
-    "name": "dfontview",
-    "description": null,
-    "projects": {
-        "dfontview": "dub.json"
-    },
     "includePath": {
+    },
+    "name": "dfontview",
+    "description": " /  /  / ",
+    "projects": {
+        "dfontview": "dub.json",
+        "dfontview:canvas": "examples/canvas/dub.json",
+        "dfontview:fontlist": "examples/fontlist/dub.json"
     }
 }

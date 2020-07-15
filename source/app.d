@@ -1,6 +1,9 @@
 import std.stdio;
+import std.conv : to;
+import std.utf;
 
 import dlangui;
+import dlangui.widgets.scroll;
 import dlangui.graphics.fonts;
 
 mixin APP_ENTRY_POINT;
@@ -13,46 +16,61 @@ extern (C) int UIAppMain(string[] args)
     Platform.instance.uiTheme="theme_default";
 
     // create window
-    Window window = Platform.instance.createWindow("D FontView", null);
+    Window window = Platform.instance.createWindow("D FontView", null,
+            WindowFlag.Resizable, 600, 400);
 
-    HorizontalLayout longLists = new HorizontalLayout;
-    longLists.layoutWidth(FILL_PARENT).layoutHeight(FILL_PARENT);
+    HorizontalLayout horiz = new HorizontalLayout;
+    horiz.layoutWidth(FILL_PARENT).layoutHeight(FILL_PARENT);
 
-    ListWidget list = new ListWidget("list1", Orientation.Vertical);
-    list.layoutWidth(FILL_PARENT).layoutHeight(FILL_PARENT);
+    ListWidget left = new ListWidget("list1", Orientation.Vertical);
 
-    StringListAdapter stringList = new StringListAdapter();
+    WidgetListAdapter listAdapter = new WidgetListAdapter();
     FontFaceProps[] faces = FontManager.instance.getFaces();
+    Log.i("Number of Faces : ", faces.length);
     for (auto i = 0; i < faces.length; ++i) {
-        stringList.add(to!dstring(faces[i].face));
+        auto label = new TextWidget();
+        Log.i("Face : ", faces[i].face);
+        try {
+            label.text = to!dstring(faces[i].face);
+        }
+        catch (UTFException e) {
+            label.text = "-----"d;
+        }
+        listAdapter.add(label);
     }
+    left.ownAdapter = listAdapter;
+    left.layoutWidth(200).layoutHeight(FILL_PARENT);
+    // left.layoutWidth(FILL_PARENT).layoutHeight(FILL_PARENT);
+    left.selectItem(0);
 
-    ListWidget fontList = new StringListWidget("FontList");
-    fontList.ownAdapter = stringList;
-    // fontList.layoutWidth(FILL_PARENT).layoutHeight(FILL_PARENT);
-    fontList.layoutWidth(200).layoutHeight(FILL_PARENT);
-    fontList.selectItem(0);
-    longLists.addChild(fontList);
+    // content
+    auto content = new VerticalLayout().fillParent;
 
-    VerticalLayout vlayout = new VerticalLayout();
-    vlayout.addChild(new TextWidget(null, "New item text:"d));
+    // control1
+    auto controls1 = new HorizontalLayout().fillHorizontal
+            .padding(3.pointsToPixels).backgroundColor(0xD8D8D8);
+    controls1.addChild(new TextWidget(null, "Text:"d));
     EditLine itemtext = new EditLine(null, "Text for new item"d);
-    vlayout.addChild(itemtext);
+    itemtext.layoutWidth(FILL_PARENT);
+    controls1.addChild(itemtext);
     
-    Button btn = new Button(null, "Add item"d);
+    Button btn = new Button(null, "Apply"d);
     btn.click = delegate(Widget src)
     {
         return true;
     };   
-    vlayout.addChild(btn);
+    controls1.addChild(btn);
 
     auto canvas = new MyCanvasWidget;
-    vlayout.addChild(canvas);
-    canvas.layoutWidth(500).layoutHeight(500);
-    
-    longLists.addChild(vlayout);
+    canvas.backgroundColor = 0xFFFF00;
+    canvas.layoutWidth = FILL_PARENT;
+    canvas.layoutHeight = FILL_PARENT;
+    canvas.padding(Rect(10,10,10,10));
 
-    window.mainWidget = longLists;
+    content.addChildren([controls1, canvas]);
+
+    horiz.addChildren([left, content]);
+    window.mainWidget = horiz;
 
     // show window
     window.show();
@@ -69,23 +87,24 @@ class MyCanvasWidget : CanvasWidget
         // FontRef font = font();
         FontRef font = FontManager.instance.getFont(25, FontWeight.Normal,
 			false, FontFamily.SansSerif, "D2Coding");
-    //		false, FontFamily.SansSerif, "Ubuntu Mono");
-	//		false, FontFamily.SansSerif, "Arial");
+		    // false, FontFamily.SansSerif, "Arial");
 
     	writeln("face ", font.face());
-    	writeln("isFixed ", font.isFixed());
-    	writeln("italic ", font.italic());
+
+        dstring t = to!dstring(font.face()) ~ " " ~ text;
 
         Point sz = font.textSize(text);
         applyAlign(rc, sz, Align.HCenter, Align.VCenter);
-        font.drawText(buf, rc.left, rc.top, text, textColor, 4, 0, textFlags);
+        // font.drawText(buf, rc.left, rc.top, text, textColor, 4, 0, textFlags);
+        font.drawText(buf, rc.left, rc.top, t, textColor, 4, 0, textFlags);
 
         writeln("width = ", this.width);
         writeln("height = ", this.height);
     }
 
     override void doDraw(DrawBuf buf, Rect rc) {
-    	dstring sampleText = "안녕하세요 Hello"d;
+    	// dstring sampleText = "Hello"d;
+    	dstring sampleText = "안녕하세요"d;
         drawText(buf,rc, sampleText);
     }
 }
