@@ -8,8 +8,6 @@ import dlangui.graphics.fonts;
 
 mixin APP_ENTRY_POINT;
 
-// temp
-string gFontFace;
 
 /// entry point for dlangui based application
 extern (C) int UIAppMain(string[] args) 
@@ -25,13 +23,6 @@ extern (C) int UIAppMain(string[] args)
     horiz.layoutWidth(FILL_PARENT).layoutHeight(FILL_PARENT);
 
     ListWidget left = new ListWidget("left", Orientation.Vertical);
-    left.itemSelected = delegate(Widget source, int index) {
-        ListWidget left = cast(ListWidget)source;
-        gFontFace = to!string(left.itemWidget(index).text);
-        Log.i("selected : ", index);
-        Log.i("face : ", gFontFace);
-        return true;
-    };
 
     WidgetListAdapter listAdapter = new WidgetListAdapter();
     FontFaceProps[] faces = FontManager.instance.getFaces();
@@ -79,6 +70,13 @@ extern (C) int UIAppMain(string[] args)
 
     content.addChildren([controls1, canvas]);
 
+    left.itemClick = delegate(Widget source, int index) {
+        ListWidget left = cast(ListWidget)source;
+        canvas.fontFace = to!string(left.itemWidget(index).text);
+        Log.i("face : ", canvas.fontFace);
+        return true;
+    };
+
     horiz.addChildren([left, content]);
     window.mainWidget = horiz;
 
@@ -94,11 +92,13 @@ class MyCanvasWidget : CanvasWidget
     this() { }
 
     protected void drawText(DrawBuf buf, Rect rc, dstring text) {
-        // FontRef font = font();
+        FontRef font = font();
+        /*
         FontRef font = FontManager.instance.getFont(25, FontWeight.Normal,
             false, FontFamily.SansSerif, gFontFace);
+            */
 
-        writeln("face ", font.face());
+        Log.d("face ", font.face());
 
         dstring t = to!dstring(font.face()) ~ " " ~ text;
 

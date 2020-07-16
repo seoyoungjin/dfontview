@@ -11,7 +11,8 @@ I started this project to test i18n feature of DLangUI library.
   - DMD64 D Compiler v2.090.1
   - LDC (1.20.1)
 - Windows
-  - Windows 8.1LDC 
+  - Windows 8.1
+  - LDC
   - Visual Studio Community Edition 2019
   - DUB version 1.21.0, built on Jun 11 2020
 
