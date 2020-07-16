@@ -8,6 +8,8 @@ import dlangui.graphics.fonts;
 
 mixin APP_ENTRY_POINT;
 
+// temp
+string gFontFace;
 
 /// entry point for dlangui based application
 extern (C) int UIAppMain(string[] args) 
@@ -22,13 +24,21 @@ extern (C) int UIAppMain(string[] args)
     HorizontalLayout horiz = new HorizontalLayout;
     horiz.layoutWidth(FILL_PARENT).layoutHeight(FILL_PARENT);
 
-    ListWidget left = new ListWidget("list1", Orientation.Vertical);
+    ListWidget left = new ListWidget("left", Orientation.Vertical);
+    left.itemSelected = delegate(Widget source, int index) {
+        ListWidget left = cast(ListWidget)source;
+        gFontFace = to!string(left.itemWidget(index).text);
+        Log.i("selected : ", index);
+        Log.i("face : ", gFontFace);
+        return true;
+    };
 
     WidgetListAdapter listAdapter = new WidgetListAdapter();
     FontFaceProps[] faces = FontManager.instance.getFaces();
     Log.i("Number of Faces : ", faces.length);
     for (auto i = 0; i < faces.length; ++i) {
         auto label = new TextWidget();
+        label.styleId = "LIST_ITEM";
         Log.i("Face : ", faces[i].face);
         try {
             label.text = to!dstring(faces[i].face);
@@ -50,7 +60,7 @@ extern (C) int UIAppMain(string[] args)
     auto controls1 = new HorizontalLayout().fillHorizontal
             .padding(3.pointsToPixels).backgroundColor(0xD8D8D8);
     controls1.addChild(new TextWidget(null, "Text:"d));
-    EditLine itemtext = new EditLine(null, "Text for new item"d);
+    EditLine itemtext = new EditLine(null);
     itemtext.layoutWidth(FILL_PARENT);
     controls1.addChild(itemtext);
     
@@ -86,10 +96,9 @@ class MyCanvasWidget : CanvasWidget
     protected void drawText(DrawBuf buf, Rect rc, dstring text) {
         // FontRef font = font();
         FontRef font = FontManager.instance.getFont(25, FontWeight.Normal,
-			false, FontFamily.SansSerif, "D2Coding");
-		    // false, FontFamily.SansSerif, "Arial");
+            false, FontFamily.SansSerif, gFontFace);
 
-    	writeln("face ", font.face());
+        writeln("face ", font.face());
 
         dstring t = to!dstring(font.face()) ~ " " ~ text;
 
@@ -97,14 +106,11 @@ class MyCanvasWidget : CanvasWidget
         applyAlign(rc, sz, Align.HCenter, Align.VCenter);
         // font.drawText(buf, rc.left, rc.top, text, textColor, 4, 0, textFlags);
         font.drawText(buf, rc.left, rc.top, t, textColor, 4, 0, textFlags);
-
-        writeln("width = ", this.width);
-        writeln("height = ", this.height);
     }
 
     override void doDraw(DrawBuf buf, Rect rc) {
-    	// dstring sampleText = "Hello"d;
-    	dstring sampleText = "안녕하세요"d;
+        // dstring sampleText = "Hello"d;
+        dstring sampleText = "안녕하세요"d;
         drawText(buf,rc, sampleText);
     }
 }
