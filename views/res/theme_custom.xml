@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<theme id="theme_custom" parent="theme_default"
+    >
+    <style id="LIST_ITEM"
+	    fontFace="Arial"
+        >
+    </style>
+</theme>

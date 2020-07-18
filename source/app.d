@@ -1,4 +1,5 @@
 import std.stdio;
+import std.string;
 import std.conv : to;
 import std.utf;
 
@@ -12,8 +13,8 @@ mixin APP_ENTRY_POINT;
 /// entry point for dlangui based application
 extern (C) int UIAppMain(string[] args) 
 {
-    Platform.instance.uiLanguage="en";
-    Platform.instance.uiTheme="theme_default";
+    Platform.instance.uiLanguage = "en";
+    Platform.instance.uiTheme = "theme_custom";
 
     // create window
     Window window = Platform.instance.createWindow("D FontView", null,
@@ -49,17 +50,13 @@ extern (C) int UIAppMain(string[] args)
 
     // control1
     auto controls1 = new HorizontalLayout().fillHorizontal
-            .padding(3.pointsToPixels).backgroundColor(0xD8D8D8);
+            .padding(3.pointsToPixels);
     controls1.addChild(new TextWidget(null, "Text:"d));
     EditLine itemtext = new EditLine(null);
     itemtext.layoutWidth(FILL_PARENT);
     controls1.addChild(itemtext);
     
     Button btn = new Button(null, "Apply"d);
-    btn.click = delegate(Widget src)
-    {
-        return true;
-    };   
     controls1.addChild(btn);
 
     auto canvas = new MyCanvasWidget;
@@ -68,9 +65,19 @@ extern (C) int UIAppMain(string[] args)
     canvas.layoutHeight = FILL_PARENT;
     canvas.padding(Rect(10,10,10,10));
 
-    content.addChildren([controls1, canvas]);
+    auto property = new FontProperty;
 
-    left.itemClick = delegate(Widget source, int index) {
+    content.addChildren([controls1, canvas, property]);
+
+    btn.click = delegate(Widget src)
+    {
+        dstring s = strip(itemtext.text);
+        canvas.userText = s;
+        property.setFace(s);
+        return true;
+    };
+
+    left.itemSelected = delegate(Widget source, int index) {
         ListWidget left = cast(ListWidget)source;
         canvas.fontFace = to!string(left.itemWidget(index).text);
         Log.i("face : ", canvas.fontFace);
@@ -89,28 +96,71 @@ extern (C) int UIAppMain(string[] args)
 
 class MyCanvasWidget : CanvasWidget
 {
-    this() { }
+    const dstring sampleText;
+    const dstring sampleTextKo;
+    dstring userText;
+
+    this() {
+        sampleText   = "The quick brown fox jumps over the lazy dog. 1234567890"d;
+        sampleTextKo = "다람쥐 헌 쳇바퀴에 타고파. 1234567890"d;
+    }
 
     protected void drawText(DrawBuf buf, Rect rc, dstring text) {
         FontRef font = font();
-        /*
-        FontRef font = FontManager.instance.getFont(25, FontWeight.Normal,
-            false, FontFamily.SansSerif, gFontFace);
-            */
-
         Log.d("face ", font.face());
 
-        dstring t = to!dstring(font.face()) ~ " " ~ text;
+        // dstring text1 = to!dstring(font.face());
+        // font.drawText(buf, rc.left + 10, rc.top, text1, textColor, 4, 0, textFlags);
 
-        Point sz = font.textSize(text);
-        applyAlign(rc, sz, Align.HCenter, Align.VCenter);
-        // font.drawText(buf, rc.left, rc.top, text, textColor, 4, 0, textFlags);
-        font.drawText(buf, rc.left, rc.top, t, textColor, 4, 0, textFlags);
+        int maxLines = 2;
+        if (maxLines == 1) {
+            Point sz = font.textSize(text);
+            applyAlign(rc, sz);
+            font.drawText(buf, rc.left, rc.top, text, textColor, 4, 0, textFlags);
+        } else {
+            SimpleTextFormatter fmt;
+            Point sz = fmt.format(text, font, maxLines, rc.width, 4, 0, textFlags);
+            applyAlign(rc, sz);
+            // TODO: apply align to alignment lines
+            fmt.draw(buf, rc.left, rc.top, font, textColor);
+        }
     }
 
     override void doDraw(DrawBuf buf, Rect rc) {
-        // dstring sampleText = "Hello"d;
-        dstring sampleText = "안녕하세요"d;
-        drawText(buf,rc, sampleText);
+        if (userText.length > 0)
+            drawText(buf,rc, userText);
+        else
+            drawText(buf,rc, sampleText);
+    }
+}
+
+
+class FontProperty : VerticalLayout
+{
+    dstring face;
+    TextWidget italic, bold, fixed, emsize;
+    TextWidget font_file;
+
+    this() {
+        this(null);
+    }
+    this(string id) {
+        super(id);
+        italic = new TextWidget();
+        bold = new TextWidget();
+        fixed = new TextWidget();
+        emsize = new TextWidget();
+        font_file = new TextWidget();
+        addChildren([italic, bold, fixed, emsize, font_file]);
+        setFace(""d);
+    }
+
+    void setFace(dstring f) {
+        face = f;
+        italic.text = "Italic : true"d;
+        bold.text = "Bold : true"d;
+        fixed.text = "Fixed : true"d;
+        emsize.text = "Emsize : 10"d;
+        font_file.text = "NAME.TTF"d;
     }
 }

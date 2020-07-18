@@ -4,6 +4,8 @@
     "targetType": "executable",
     "targetPath": "bin",
 
+    "stringImportPaths": ["views", "views/res"],
+
     "subPackages": [
         "./examples/canvas/",
         "./examples/fontlist/"
