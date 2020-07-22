@@ -4,7 +4,7 @@ D Fontview
 Simple Fontview written using DlangUI library.
 I started this project to test i18n feature of DLangUI library.
 
-### System and Tools Version
+## System and Tools Version
 
 - Linux
   - Ubuntu 20.04 LTS
@@ -16,14 +16,24 @@ I started this project to test i18n feature of DLangUI library.
   - Visual Studio Community Edition 2019
   - DUB version 1.21.0, built on Jun 11 2020
 
+## TODO
+
+- Text View
+  - Ligature? (HarpBuzz)
+- Code View
+- Font Property (font_info.py or ftdump.py in freetype-py/example)
+- Noto Color Emoji
+  - howto resize in fontmanager
+- Refer Nexusfont, TFT Font Viewer
+
 Screen Shot
 -----------
 
-### Linux
+## Linux
 
 ![2002-07-15](https://seoyoungjin.github.com/screenshot/dfontview/20200715.png)
 
-### Windows
+## Windows
 
 Face name with current locale - OEM charset
 
@@ -33,4 +43,3 @@ Blog
 ----
 
 Blog in Korean: [https://seoyoungjin.github.com](https://seoyoungjin.github.com)
-

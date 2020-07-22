@@ -10,9 +10,26 @@ import dlangui.graphics.fonts;
 mixin APP_ENTRY_POINT;
 
 
+class FontViewFrame : AppFrame {
+    /// create app body widget
+    override protected Widget createBody() {
+        auto bodyWidget = new HorizontalLayout();
+        bodyWidget.layoutWidth = FILL_PARENT;
+        bodyWidget.layoutHeight = FILL_PARENT;
+        return bodyWidget;
+    }
+}
+
 /// entry point for dlangui based application
 extern (C) int UIAppMain(string[] args) 
 {
+   // embed non-standard resources listed in views/resources.list into executable
+    embeddedResourceList.addResources(embedResourcesFromList!("resources.list")());
+
+    /// set font gamma (1.0 is neutral, < 1.0 makes glyphs lighter, >1.0 makes glyphs bolder)
+    FontManager.fontGamma = 0.8;
+    FontManager.hintingMode = HintingMode.Normal;
+
     Platform.instance.uiLanguage = "en";
     Platform.instance.uiTheme = "theme_custom";
 
@@ -20,10 +37,8 @@ extern (C) int UIAppMain(string[] args)
     Window window = Platform.instance.createWindow("D FontView", null,
             WindowFlag.Resizable, 600, 400);
 
-    HorizontalLayout horiz = new HorizontalLayout;
-    horiz.layoutWidth(FILL_PARENT).layoutHeight(FILL_PARENT);
-
-    ListWidget left = new ListWidget("left", Orientation.Vertical);
+    auto frame = new FontViewFrame();
+    auto left = new ListWidget("left", Orientation.Vertical);
 
     WidgetListAdapter listAdapter = new WidgetListAdapter();
     FontFaceProps[] faces = FontManager.instance.getFaces();
@@ -59,33 +74,34 @@ extern (C) int UIAppMain(string[] args)
     Button btn = new Button(null, "Apply"d);
     controls1.addChild(btn);
 
-    auto canvas = new MyCanvasWidget;
-    canvas.backgroundColor = 0xFFFF00;
+    auto canvas = new FontViewCanvas;
+    // canvas.backgroundColor = 0xFFFF00;
     canvas.layoutWidth = FILL_PARENT;
     canvas.layoutHeight = FILL_PARENT;
     canvas.padding(Rect(10,10,10,10));
 
-    auto property = new FontProperty;
+    // auto property = new FontProperty;
 
-    content.addChildren([controls1, canvas, property]);
+    content.addChild(controls1);
+    content.addChild(canvas);
 
     btn.click = delegate(Widget src)
     {
         dstring s = strip(itemtext.text);
         canvas.userText = s;
-        property.setFace(s);
+        // property.setFace(s);
         return true;
     };
 
     left.itemSelected = delegate(Widget source, int index) {
         ListWidget left = cast(ListWidget)source;
-        canvas.fontFace = to!string(left.itemWidget(index).text);
-        Log.i("face : ", canvas.fontFace);
+        canvas.userFontFace = to!string(left.itemWidget(index).text);
         return true;
     };
 
-    horiz.addChildren([left, content]);
-    window.mainWidget = horiz;
+    frame.statusLine.setStatusText(format("%d font faces"d, faces.length));
+    frame.frameBody.addChildren([left, content]);
+    window.mainWidget = frame;
 
     // show window
     window.show();
@@ -94,8 +110,9 @@ extern (C) int UIAppMain(string[] args)
     return Platform.instance.enterMessageLoop();
 }
 
-class MyCanvasWidget : CanvasWidget
+class FontViewCanvas : CanvasWidget
 {
+    string userFontFace;
     const dstring sampleText;
     const dstring sampleTextKo;
     dstring userText;
@@ -107,23 +124,22 @@ class MyCanvasWidget : CanvasWidget
 
     protected void drawText(DrawBuf buf, Rect rc, dstring text) {
         FontRef font = font();
-        Log.d("face ", font.face());
 
-        // dstring text1 = to!dstring(font.face());
-        // font.drawText(buf, rc.left + 10, rc.top, text1, textColor, 4, 0, textFlags);
+        // label
+        dstring text1 = to!dstring(userFontFace);
+        font.drawText(buf, rc.left, rc.top, text1, textColor, 4, 0, textFlags);
 
-        int maxLines = 2;
-        if (maxLines == 1) {
-            Point sz = font.textSize(text);
-            applyAlign(rc, sz);
-            font.drawText(buf, rc.left, rc.top, text, textColor, 4, 0, textFlags);
-        } else {
-            SimpleTextFormatter fmt;
-            Point sz = fmt.format(text, font, maxLines, rc.width, 4, 0, textFlags);
-            applyAlign(rc, sz);
-            // TODO: apply align to alignment lines
-            fmt.draw(buf, rc.left, rc.top, font, textColor);
-        }
+        // contents
+        FontRef font2 = FontManager.instance.getFont(25, FontWeight.Normal, false,
+                FontFamily.Unspecified, userFontFace);
+        if (font2.isNull)
+            return;
+
+        SimpleTextFormatter fmt;
+        Point sz = fmt.format(text, font2, 0, rc.width, 4, 0, textFlags);
+        applyAlign(rc, sz);
+        // TODO: apply align to alignment lines
+        fmt.draw(buf, rc.left, rc.top + 30, font2, textColor);
     }
 
     override void doDraw(DrawBuf buf, Rect rc) {
