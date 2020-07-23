@@ -4,21 +4,14 @@ import std.conv : to;
 import std.utf;
 
 import dlangui;
+import fontview.ui.frame;
+/*
 import dlangui.widgets.scroll;
 import dlangui.graphics.fonts;
+*/
 
 mixin APP_ENTRY_POINT;
 
-
-class FontViewFrame : AppFrame {
-    /// create app body widget
-    override protected Widget createBody() {
-        auto bodyWidget = new HorizontalLayout();
-        bodyWidget.layoutWidth = FILL_PARENT;
-        bodyWidget.layoutHeight = FILL_PARENT;
-        return bodyWidget;
-    }
-}
 
 /// entry point for dlangui based application
 extern (C) int UIAppMain(string[] args) 
