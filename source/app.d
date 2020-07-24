@@ -1,14 +1,12 @@
 import std.stdio;
 import std.string;
+import std.algorithm;
 import std.conv : to;
 import std.utf;
 
 import dlangui;
 import fontview.ui.frame;
-/*
-import dlangui.widgets.scroll;
-import dlangui.graphics.fonts;
-*/
+import fontview.ui.pangram;
 
 mixin APP_ENTRY_POINT;
 
@@ -31,27 +29,25 @@ extern (C) int UIAppMain(string[] args)
             WindowFlag.Resizable, 600, 400);
 
     auto frame = new FontViewFrame();
-    auto left = new ListWidget("left", Orientation.Vertical);
+
+    auto left = new VerticalLayout().layoutWidth(200).layoutHeight(FILL_PARENT);
+    auto fontFilter = new EditLine("fontFilter");
+    auto fontList = new ListWidget("fontList", Orientation.Vertical);
 
     WidgetListAdapter listAdapter = new WidgetListAdapter();
-    FontFaceProps[] faces = FontManager.instance.getFaces();
-    Log.i("Number of Faces : ", faces.length);
-    for (auto i = 0; i < faces.length; ++i) {
-        auto label = new TextWidget();
-        label.styleId = "LIST_ITEM";
-        Log.i("Face : ", faces[i].face);
-        try {
-            label.text = to!dstring(faces[i].face);
-        }
-        catch (UTFException e) {
-            label.text = "-----"d;
-        }
-        listAdapter.add(label);
-    }
-    left.ownAdapter = listAdapter;
-    left.layoutWidth(200).layoutHeight(FILL_PARENT);
-    // left.layoutWidth(FILL_PARENT).layoutHeight(FILL_PARENT);
-    left.selectItem(0);
+    updateFontList(listAdapter);
+    fontList.ownAdapter = listAdapter;
+    fontList.selectItem(0);
+
+    // listeners
+    fontFilter.contentChange = delegate (EditableContent source) {
+        writeln("Text = ", source.text);
+        updateFontList(listAdapter);
+    };
+
+    // left.margins(Rect(5,5,5,5));
+    left.addChild(fontFilter);
+    left.addChild(fontList);
 
     // content
     auto content = new VerticalLayout().fillParent;
@@ -86,13 +82,13 @@ extern (C) int UIAppMain(string[] args)
         return true;
     };
 
-    left.itemSelected = delegate(Widget source, int index) {
-        ListWidget left = cast(ListWidget)source;
-        canvas.userFontFace = to!string(left.itemWidget(index).text);
+    fontList.itemSelected = delegate(Widget source, int index) {
+        ListWidget fontList = cast(ListWidget)source;
+        canvas.userFontFace = to!string(fontList.itemWidget(index).text);
         return true;
     };
 
-    frame.statusLine.setStatusText(format("%d font faces"d, faces.length));
+    frame.statusLine.setStatusText(format("%d font faces"d, fontList.itemCount));
     frame.frameBody.addChildren([left, content]);
     window.mainWidget = frame;
 
@@ -103,73 +99,26 @@ extern (C) int UIAppMain(string[] args)
     return Platform.instance.enterMessageLoop();
 }
 
-class FontViewCanvas : CanvasWidget
+void updateFontList(WidgetListAdapter listAdapter)
 {
-    string userFontFace;
-    const dstring sampleText;
-    const dstring sampleTextKo;
-    dstring userText;
-
-    this() {
-        sampleText   = "The quick brown fox jumps over the lazy dog. 1234567890"d;
-        sampleTextKo = "다람쥐 헌 쳇바퀴에 타고파. 1234567890"d;
+    FontFaceProps[] faceProps = FontManager.instance.getFaces();
+    dstring[] faces;
+    Log.i("Number of Font Faces : ", faceProps.length);
+    foreach (prop; faceProps) {
+        try {
+            faces ~= to!dstring(prop.face);
+        }
+        catch (UTFException e) {
+            faces ~= "-----"d;
+        }
     }
+    faces.sort();
 
-    protected void drawText(DrawBuf buf, Rect rc, dstring text) {
-        FontRef font = font();
-
-        // label
-        dstring text1 = to!dstring(userFontFace);
-        font.drawText(buf, rc.left, rc.top, text1, textColor, 4, 0, textFlags);
-
-        // contents
-        FontRef font2 = FontManager.instance.getFont(25, FontWeight.Normal, false,
-                FontFamily.Unspecified, userFontFace);
-        if (font2.isNull)
-            return;
-
-        SimpleTextFormatter fmt;
-        Point sz = fmt.format(text, font2, 0, rc.width, 4, 0, textFlags);
-        applyAlign(rc, sz);
-        // TODO: apply align to alignment lines
-        fmt.draw(buf, rc.left, rc.top + 30, font2, textColor);
-    }
-
-    override void doDraw(DrawBuf buf, Rect rc) {
-        if (userText.length > 0)
-            drawText(buf,rc, userText);
-        else
-            drawText(buf,rc, sampleText);
-    }
-}
-
-
-class FontProperty : VerticalLayout
-{
-    dstring face;
-    TextWidget italic, bold, fixed, emsize;
-    TextWidget font_file;
-
-    this() {
-        this(null);
-    }
-    this(string id) {
-        super(id);
-        italic = new TextWidget();
-        bold = new TextWidget();
-        fixed = new TextWidget();
-        emsize = new TextWidget();
-        font_file = new TextWidget();
-        addChildren([italic, bold, fixed, emsize, font_file]);
-        setFace(""d);
-    }
-
-    void setFace(dstring f) {
-        face = f;
-        italic.text = "Italic : true"d;
-        bold.text = "Bold : true"d;
-        fixed.text = "Fixed : true"d;
-        emsize.text = "Emsize : 10"d;
-        font_file.text = "NAME.TTF"d;
+    listAdapter.clear();
+    foreach (face; faces) {
+        auto label = new TextWidget();
+        label.styleId = "LIST_ITEM";
+        label.text = face;
+        listAdapter.add(label);
     }
 }
