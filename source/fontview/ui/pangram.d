@@ -4,7 +4,6 @@ import dlangui;
 
 class FontViewCanvas : CanvasWidget
 {
-    string userFontFace;
     const dstring sampleText;
     const dstring sampleTextKo;
     dstring userText;
@@ -17,19 +16,19 @@ class FontViewCanvas : CanvasWidget
     protected void drawText(DrawBuf buf, Rect rc, dstring text){
         int y = rc.top; 
         FontRef font = FontManager.instance.getFont(16, FontWeight.Normal, false,
-                FontFamily.Unspecified, userFontFace);
+                FontFamily.Unspecified, fontFace);
         if (font.isNull) {
-            Log.d("Failed to getFont ", userFontFace);
+            Log.d("Failed to getFont ", fontFace);
             return;
         }
 
         // face name
-        dstring text1 = to!dstring(userFontFace);
+        dstring text1 = to!dstring(fontFace);
         font.drawText(buf, rc.left, y, text1, textColor, 4, 0, textFlags);
 
         // contents
         font = FontManager.instance.getFont(12, FontWeight.Normal, false,
-                FontFamily.Unspecified, userFontFace);
+                FontFamily.Unspecified, fontFace);
         if (font.isNull)
             return;
 
@@ -44,7 +43,7 @@ class FontViewCanvas : CanvasWidget
         y += 20;
         foreach (size; [8, 9, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36]) {
             font = FontManager.instance.getFont(size, FontWeight.Normal, false,
-                    FontFamily.Unspecified, userFontFace);
+                    FontFamily.Unspecified, fontFace);
             if (font.isNull)
                 continue;
             font.drawText(buf, rc.left, y, text, textColor);

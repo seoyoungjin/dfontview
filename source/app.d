@@ -32,17 +32,16 @@ extern (C) int UIAppMain(string[] args)
 
     auto left = new VerticalLayout().layoutWidth(200).layoutHeight(FILL_PARENT);
     auto fontFilter = new EditLine("fontFilter");
-    auto fontList = new ListWidget("fontList", Orientation.Vertical);
+    fontFilter.margins(Rect(5,5,5,5));
 
-    WidgetListAdapter listAdapter = new WidgetListAdapter();
+    auto fontList = new StringListWidget("fontList");
+    auto listAdapter = new StringListAdapter();
     updateFontList(listAdapter);
     fontList.ownAdapter = listAdapter;
-    fontList.selectItem(0);
 
     // listeners
     fontFilter.contentChange = delegate (EditableContent source) {
-        writeln("Text = ", source.text);
-        updateFontList(listAdapter);
+        updateFontList(listAdapter, source.text);
     };
 
     // left.margins(Rect(5,5,5,5));
@@ -64,7 +63,6 @@ extern (C) int UIAppMain(string[] args)
     controls1.addChild(btn);
 
     auto canvas = new FontViewCanvas;
-    // canvas.backgroundColor = 0xFFFF00;
     canvas.layoutWidth = FILL_PARENT;
     canvas.layoutHeight = FILL_PARENT;
     canvas.padding(Rect(10,10,10,10));
@@ -84,9 +82,11 @@ extern (C) int UIAppMain(string[] args)
 
     fontList.itemSelected = delegate(Widget source, int index) {
         ListWidget fontList = cast(ListWidget)source;
-        canvas.userFontFace = to!string(fontList.itemWidget(index).text);
+        canvas.fontFace = to!string(fontList.itemWidget(index).text);
         return true;
     };
+    fontList.selectItem(0);
+    fontList.itemSelected.emit(fontList, 0);
 
     frame.statusLine.setStatusText(format("%d font faces"d, fontList.itemCount));
     frame.frameBody.addChildren([left, content]);
@@ -99,8 +99,9 @@ extern (C) int UIAppMain(string[] args)
     return Platform.instance.enterMessageLoop();
 }
 
-void updateFontList(WidgetListAdapter listAdapter)
+void updateFontList(StringListAdapter listAdapter, dstring filter = null)
 {
+    // sorted font list
     FontFaceProps[] faceProps = FontManager.instance.getFaces();
     dstring[] faces;
     Log.i("Number of Font Faces : ", faceProps.length);
@@ -116,9 +117,8 @@ void updateFontList(WidgetListAdapter listAdapter)
 
     listAdapter.clear();
     foreach (face; faces) {
-        auto label = new TextWidget();
-        label.styleId = "LIST_ITEM";
-        label.text = face;
-        listAdapter.add(label);
+        if (filter && filter.length && indexOf(face, filter) < 0)
+            continue;
+        listAdapter.add(face);
     }
 }
