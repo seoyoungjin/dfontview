@@ -7,6 +7,8 @@ import std.utf;
 import dlangui;
 import fontview.ui.frame;
 import fontview.ui.pangram;
+import fontview.ui.property;
+import fontview.ui.codetable;
 
 mixin APP_ENTRY_POINT;
 
@@ -30,6 +32,7 @@ extern (C) int UIAppMain(string[] args)
 
     auto frame = new FontViewFrame();
 
+    // create font list and filter
     auto left = new VerticalLayout().layoutWidth(200).layoutHeight(FILL_PARENT);
     auto fontFilter = new EditLine("fontFilter");
     fontFilter.margins(Rect(5,5,5,5));
@@ -48,10 +51,13 @@ extern (C) int UIAppMain(string[] args)
     left.addChild(fontFilter);
     left.addChild(fontList);
 
-    // content
-    auto content = new VerticalLayout().fillParent;
+    // create tabs
+    TabWidget tabs = new TabWidget("Tabs");
+    tabs.layoutWidth(FILL_PARENT).layoutHeight(FILL_PARENT);
 
-    // control1
+    // pangram
+    auto pangram = new VerticalLayout("pangram").fillParent;
+
     auto controls1 = new HorizontalLayout().fillHorizontal
             .padding(3.pointsToPixels);
     controls1.addChild(new TextWidget(null, "Text:"d));
@@ -63,20 +69,18 @@ extern (C) int UIAppMain(string[] args)
     controls1.addChild(btn);
 
     auto canvas = new FontViewCanvas;
+    canvas.backgroundColor = 0xFFFFFF;
     canvas.layoutWidth = FILL_PARENT;
     canvas.layoutHeight = FILL_PARENT;
     canvas.padding(Rect(10,10,10,10));
 
-    // auto property = new FontProperty;
-
-    content.addChild(controls1);
-    content.addChild(canvas);
+    pangram.addChild(controls1);
+    pangram.addChild(canvas);
 
     btn.click = delegate(Widget src)
     {
         dstring s = strip(itemtext.text);
         canvas.userText = s;
-        // property.setFace(s);
         return true;
     };
 
@@ -88,8 +92,17 @@ extern (C) int UIAppMain(string[] args)
     fontList.selectItem(0);
     fontList.itemSelected.emit(fontList, 0);
 
+    auto codetable = new CodeTable("charmap");
+    auto property = new FontProperty("property");
+
+    tabs.addTab(pangram, "Pangram"d);
+    tabs.addTab(codetable, "Code Table"d);
+    tabs.addTab(property, "Property"d);
+    tabs.selectTab("pangram");
+
+    frame.frameBody.addChild(left);
+    frame.frameBody.addChild(tabs);
     frame.statusLine.setStatusText(format("%d font faces"d, fontList.itemCount));
-    frame.frameBody.addChildren([left, content]);
     window.mainWidget = frame;
 
     // show window
