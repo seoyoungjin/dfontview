@@ -1,5 +1,6 @@
 import std.stdio;
 import std.string;
+import std.typecons : No;
 
 import dlangui;
 import fontview.ui.appdata;
@@ -89,7 +90,7 @@ void updateFontList(StringListAdapter listAdapter, dstring filter = null)
 
     listAdapter.clear();
     foreach (face; faces) {
-        if (filter && filter.length && indexOf(face, filter) < 0)
+        if (filter && indexOf(face, filter, No.caseSensitive) < 0)
             continue;
         listAdapter.add(face);
     }

@@ -5,7 +5,7 @@
     "targetName": "fontlist",
     "targetType": "executable",
 
-    "sourceFiles-windows": ["$PACKAGE_DIR/source/win_app.def"],
+    "sourceFiles-windows": [],
 
     "dependencies": {
         "dlangui": "~>0.9.99"

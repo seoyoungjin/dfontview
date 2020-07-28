@@ -24,15 +24,15 @@ class Pangram : VerticalLayout
         Button btn = new Button(null, "Apply"d);
         controls1.addChild(btn);
 
-        auto canvas = new PangramView("pangram");
+        auto pangramView = new PangramView("pangram");
 
         addChild(controls1);
-        addChild(canvas);
+        addChild(pangramView);
 
         btn.click = delegate(Widget src)
         {
             dstring s = strip(itemtext.text);
-            // canvas.userText = s;
+            appData.userText = s;
             return true;
         };
     }
@@ -46,25 +46,33 @@ class PangramView : ScrollWidget
         _vscrollbarMode = ScrollBarMode.Auto;
         _hscrollbarMode = ScrollBarMode.Auto;
 
-        auto canvas = new FontViewCanvas;
-        canvas.backgroundColor = 0xFFFFFF;
+        auto canvas = new FontViewCanvas(this);
         canvas.layoutWidth = FILL_PARENT;
         canvas.layoutHeight = FILL_PARENT;
-        canvas.layoutWidth = 500;
-        canvas.layoutHeight = 800;
+        canvas.backgroundColor = 0xFFFFFF;
         canvas.padding(Rect(10,10,10,10));
 
+        // backgroundColor = canvas.backgroundColor;
         contentWidget = canvas;
+    }
+
+    /// override to support modification of client rect after change, e.g. apply offset
+    override void handleClientRectLayout(ref Rect rc) {
+        if (isSpecialSize(contentWidget.layoutWidth))
+            contentWidget.layoutWidth = rc.width;
+        if (isSpecialSize(contentWidget.layoutHeight))
+            contentWidget.layoutHeight = rc.height;
     }
 }
 
 class FontViewCanvas : CanvasWidget {
+    ScrollWidget _scroll;
     const dstring sampleText;
     const dstring sampleTextKo;
-    dstring userText;
 
-    this() {
+    this(ScrollWidget w) {
         super();
+        _scroll = w;
         sampleText   = "The quick brown fox jumps over the lazy dog. 1234567890"d;
         sampleTextKo = "다람쥐 헌 쳇바퀴에 타고파. 1234567890"d;
     }
@@ -77,6 +85,13 @@ class FontViewCanvas : CanvasWidget {
             Log.d("Failed to getFont ", appData.fontFace);
             return;
         }
+
+        // approximate size of text string
+        Point sz = font.textSize(text);
+        int w1 = cast(int)(sz.x * 2.3);
+        int h1 = sz.y * 19 + 105;
+        layoutWidth = max(_scroll.clientRect.width, w1);
+        layoutHeight = max(_scroll.clientRect.height, h1);
 
         // face name
         dstring text1 = to!dstring(appData.fontFace);
@@ -108,8 +123,8 @@ class FontViewCanvas : CanvasWidget {
     }
 
     override void doDraw(DrawBuf buf, Rect rc) {
-        if (userText.length > 0)
-            drawText(buf,rc, userText);
+        if (appData.userText.length > 0)
+            drawText(buf,rc, appData.userText);
         else
             drawText(buf,rc, sampleText);
     }

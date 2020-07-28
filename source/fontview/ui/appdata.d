@@ -9,6 +9,7 @@ import dlangui;
 class AppData {
     string fontFace;
     dstring[] faces;
+    dstring userText;
 
     // get sorted font list
     dstring[] getFontFaces()
