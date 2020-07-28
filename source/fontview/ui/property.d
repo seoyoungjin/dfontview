@@ -14,12 +14,10 @@ class FontProperty : VerticalLayout
     TextWidget italic, bold, fixed, emsize;
     TextWidget font_file;
 
-    this() {
-        this(null);
-    }
-
     this(string id) {
         super(id);
+        fillParent();
+
         italic = new TextWidget();
         bold = new TextWidget();
         fixed = new TextWidget();

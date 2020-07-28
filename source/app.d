@@ -1,14 +1,12 @@
 import std.stdio;
 import std.string;
-import std.algorithm;
-import std.conv : to;
-import std.utf;
 
 import dlangui;
+import fontview.ui.appdata;
 import fontview.ui.frame;
 import fontview.ui.pangram;
 import fontview.ui.property;
-import fontview.ui.codetable;
+import fontview.ui.charmap;
 
 mixin APP_ENTRY_POINT;
 
@@ -55,54 +53,27 @@ extern (C) int UIAppMain(string[] args)
     TabWidget tabs = new TabWidget("Tabs");
     tabs.layoutWidth(FILL_PARENT).layoutHeight(FILL_PARENT);
 
-    // pangram
-    auto pangram = new VerticalLayout("pangram").fillParent;
-
-    auto controls1 = new HorizontalLayout().fillHorizontal
-            .padding(3.pointsToPixels);
-    controls1.addChild(new TextWidget(null, "Text:"d));
-    EditLine itemtext = new EditLine(null);
-    itemtext.layoutWidth(FILL_PARENT);
-    controls1.addChild(itemtext);
-    
-    Button btn = new Button(null, "Apply"d);
-    controls1.addChild(btn);
-
-    auto canvas = new FontViewCanvas;
-    canvas.backgroundColor = 0xFFFFFF;
-    canvas.layoutWidth = FILL_PARENT;
-    canvas.layoutHeight = FILL_PARENT;
-    canvas.padding(Rect(10,10,10,10));
-
-    pangram.addChild(controls1);
-    pangram.addChild(canvas);
-
-    btn.click = delegate(Widget src)
-    {
-        dstring s = strip(itemtext.text);
-        canvas.userText = s;
-        return true;
-    };
-
-    fontList.itemSelected = delegate(Widget source, int index) {
-        ListWidget fontList = cast(ListWidget)source;
-        canvas.fontFace = to!string(fontList.itemWidget(index).text);
-        return true;
-    };
-    fontList.selectItem(0);
-    fontList.itemSelected.emit(fontList, 0);
-
-    auto codetable = new CodeTable("charmap");
+    auto pangram = new Pangram("pangram");
+    auto charmap = new UnicodeMap("charmap");
     auto property = new FontProperty("property");
 
     tabs.addTab(pangram, "Pangram"d);
-    tabs.addTab(codetable, "Code Table"d);
+    tabs.addTab(charmap, "Unicode"d);
     tabs.addTab(property, "Property"d);
     tabs.selectTab("pangram");
 
     frame.frameBody.addChild(left);
     frame.frameBody.addChild(tabs);
     frame.statusLine.setStatusText(format("%d font faces"d, fontList.itemCount));
+
+    fontList.itemSelected = delegate(Widget source, int index) {
+        ListWidget fontList = cast(ListWidget)source;
+        appData.fontFace = to!string(fontList.itemWidget(index).text);
+        return true;
+    };
+    fontList.selectItem(0);
+    fontList.itemSelected.emit(fontList, 0);
+
     window.mainWidget = frame;
 
     // show window
@@ -114,19 +85,7 @@ extern (C) int UIAppMain(string[] args)
 
 void updateFontList(StringListAdapter listAdapter, dstring filter = null)
 {
-    // sorted font list
-    FontFaceProps[] faceProps = FontManager.instance.getFaces();
-    dstring[] faces;
-    Log.i("Number of Font Faces : ", faceProps.length);
-    foreach (prop; faceProps) {
-        try {
-            faces ~= to!dstring(prop.face);
-        }
-        catch (UTFException e) {
-            faces ~= "-----"d;
-        }
-    }
-    faces.sort();
+    dstring[] faces = appData.getFontFaces();
 
     listAdapter.clear();
     foreach (face; faces) {
