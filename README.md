@@ -20,8 +20,9 @@ I started this project to test i18n feature of DLangUI library.
 
 - Text View
   - Ligature? (HarpBuzz)
-- Code View
-- Font Property (font_info.py or ftdump.py in freetype-py/example)
+- Unicode map
+  - tooltip
+- Font Property (`font_info.py` or `ftdump.py` in freetype-py/example)
 - Noto Color Emoji
   - howto resize in fontmanager
 - Refer Nexusfont, TFT Font Viewer
@@ -31,7 +32,7 @@ Screen Shot
 
 ## Linux
 
-![2002-07-15](https://seoyoungjin.github.com/screenshot/dfontview/20200715.png)
+![2002-07-20](https://seoyoungjin.github.com/screenshot/dfontview/20200730_pangram.png)
 
 ## Windows
 

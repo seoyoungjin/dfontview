@@ -12,6 +12,6 @@
     ],
 
     "dependencies": {
-        "dlangui": "~>0.9.99"
+        "dlangui": "~>0.9.186"
     }
 }

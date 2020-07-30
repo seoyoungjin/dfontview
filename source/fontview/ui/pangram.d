@@ -62,23 +62,27 @@ class PangramView : ScrollWidget
             contentWidget.layoutWidth = rc.width;
         if (isSpecialSize(contentWidget.layoutHeight))
             contentWidget.layoutHeight = rc.height;
+
+        // approximate size of text string
+        FontRef font = FontManager.instance.getFont(36, FontWeight.Normal, false,
+                FontFamily.Unspecified, appData.fontFace);
+        if (font.isNull)
+            return;
+        Point sz = font.textSize(appData.text());
+        contentWidget.layoutWidth = max(clientRect.width, sz.x + 20);
+        contentWidget.layoutHeight = max(clientRect.height, sz.y * 9 + 100);
     }
 }
 
 class FontViewCanvas : CanvasWidget {
     ScrollWidget _scroll;
-    const dstring sampleText;
-    const dstring sampleTextKo;
 
     this(ScrollWidget w) {
         super();
         _scroll = w;
-        sampleText   = "The quick brown fox jumps over the lazy dog. 1234567890"d;
-        sampleTextKo = "다람쥐 헌 쳇바퀴에 타고파. 1234567890"d;
     }
 
-    protected void drawText(DrawBuf buf, Rect rc, dstring text){
-        int y = rc.top; 
+    override void doDraw(DrawBuf buf, Rect rc) {
         FontRef font = FontManager.instance.getFont(16, FontWeight.Normal, false,
                 FontFamily.Unspecified, appData.fontFace);
         if (font.isNull) {
@@ -86,14 +90,10 @@ class FontViewCanvas : CanvasWidget {
             return;
         }
 
-        // approximate size of text string
-        Point sz = font.textSize(text);
-        int w1 = cast(int)(sz.x * 2.3);
-        int h1 = sz.y * 19 + 105;
-        layoutWidth = max(_scroll.clientRect.width, w1);
-        layoutHeight = max(_scroll.clientRect.height, h1);
+        dstring text = appData.text();
 
         // face name
+        int y = rc.top; 
         dstring text1 = to!dstring(appData.fontFace);
         font.drawText(buf, rc.left, y, text1, textColor, 4, 0, textFlags);
 
@@ -120,12 +120,5 @@ class FontViewCanvas : CanvasWidget {
             font.drawText(buf, rc.left, y, text, textColor);
             y += font.height + 5;
         }
-    }
-
-    override void doDraw(DrawBuf buf, Rect rc) {
-        if (appData.userText.length > 0)
-            drawText(buf,rc, appData.userText);
-        else
-            drawText(buf,rc, sampleText);
     }
 }

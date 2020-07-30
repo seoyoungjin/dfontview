@@ -27,7 +27,7 @@ extern (C) int UIAppMain(string[] args)
 
     // create window
     Window window = Platform.instance.createWindow("D FontView", null,
-            WindowFlag.Resizable, 600, 400);
+            WindowFlag.Resizable, 800, 600);
 
     auto frame = new FontViewFrame();
 
@@ -38,15 +38,14 @@ extern (C) int UIAppMain(string[] args)
 
     auto fontList = new StringListWidget("fontList");
     auto listAdapter = new StringListAdapter();
-    updateFontList(listAdapter);
     fontList.ownAdapter = listAdapter;
+    updateFontList(fontList);
 
     // listeners
     fontFilter.contentChange = delegate (EditableContent source) {
-        updateFontList(listAdapter, source.text);
+        updateFontList(fontList, source.text);
     };
 
-    // left.margins(Rect(5,5,5,5));
     left.addChild(fontFilter);
     left.addChild(fontList);
 
@@ -84,14 +83,17 @@ extern (C) int UIAppMain(string[] args)
     return Platform.instance.enterMessageLoop();
 }
 
-void updateFontList(StringListAdapter listAdapter, dstring filter = null)
+void updateFontList(StringListWidget w, dstring filter = null)
 {
+    auto adapter = cast(StringListAdapter) w.adapter;
     dstring[] faces = appData.getFontFaces();
 
-    listAdapter.clear();
+    adapter.clear();
     foreach (face; faces) {
         if (filter && indexOf(face, filter, No.caseSensitive) < 0)
             continue;
-        listAdapter.add(face);
+        adapter.add(face);
     }
+    // range error
+    w.selectedItemIndex(-1);
 }
