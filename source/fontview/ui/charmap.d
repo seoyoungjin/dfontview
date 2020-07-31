@@ -59,11 +59,11 @@ class UnicodeMap : VerticalLayout
         auto controls2 = new HorizontalLayout()
             .fillHorizontal
             .padding(3.pointsToPixels);
-        EditLine itemtext = new EditLine(null);
-        itemtext.layoutWidth(FILL_PARENT);
-        Button btn_clear = new Button(null, "Clear"d);
-        Button btn_copy = new Button(null, "Copy"d);
-        controls2.addChildren([itemtext, btn_clear, btn_copy]);
+        EditLine itemText = new EditLine(null);
+        itemText.layoutWidth(FILL_PARENT);
+        Button btnClear = new Button(null, "Clear"d);
+        Button btnCopy = new Button(null, "Copy"d);
+        controls2.addChildren([itemText, btnClear, btnCopy]);
 
         // signal handlers
         sizes.itemClick = delegate(Widget source, int itemIndex) {
@@ -77,9 +77,31 @@ class UnicodeMap : VerticalLayout
         codeEdit.contentChange = delegate(EditableContent content) {
             if (content.text.length == 0)
                 return;
-            else if (1 < content.text.length)
+            if (1 < content.text.length)
                 codeEdit.text = codeEdit.text[0 .. 1];
-            // LATER
+            int code = codeEdit.text[0];
+            int row = appData.unicodeMapIndex(code);
+            // LATER BUG? - row and col differs 1
+            if (row != -1)
+                grid.selectCell((code & 15) + 1, row + 1);
+        };
+
+        // Callback for handling of cell double click or Enter key press
+        grid.cellActivated = delegate(GridWidgetBase source, int col, int row) {
+            StringGridWidgetBase w = cast(StringGridWidgetBase)source;
+            itemText.text(itemText.text ~ w.cellText(col, row));
+        };
+
+        btnCopy.click = delegate(Widget src)
+        {
+            platform.setClipboardText(itemText.text);
+            return true;
+        };
+
+        btnClear.click = delegate(Widget src)
+        {
+            itemText.text = ""d;
+            return true;
         };
 
         addChild(controls1);
@@ -99,8 +121,7 @@ class FontViewGridCellAdapter : CustomGridCellAdapter {
     /// return true for custom drawn cell
     override bool isCustomCell(int col, int row) {
         //if (col < 0 || row < 0)
-            return true;
-        //return false;
+        return true;
     }
 
     /// return cell size
@@ -111,7 +132,7 @@ class FontViewGridCellAdapter : CustomGridCellAdapter {
         if (col < 0)
             w = currentTheme.fontSize * 3;
         if (row < 0)
-            h = currentTheme.fontSize;
+            h = currentTheme.fontSize + 4;
         return Point(w, h);
     }
 

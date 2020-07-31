@@ -49,6 +49,10 @@ class AppData {
             unicodeMap[i] = i * 16;
         }
     }
+
+    int unicodeMapIndex(int code) {
+        return code >> 4;
+    }
 };
 
 AppData appData;
