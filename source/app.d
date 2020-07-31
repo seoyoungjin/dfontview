@@ -69,6 +69,8 @@ extern (C) int UIAppMain(string[] args)
     fontList.itemSelected = delegate(Widget source, int index) {
         ListWidget fontList = cast(ListWidget)source;
         appData.fontFace = to!string(fontList.itemWidget(index).text);
+        assert(charmap.childCount() && charmap.childById("GRID1"));
+        charmap.childById("GRID1").fontFace = appData.fontFace;
         return true;
     };
     fontList.selectItem(0);

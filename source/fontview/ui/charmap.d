@@ -1,7 +1,13 @@
 module fontview.ui.charmap;
 
 import std.stdio;
+import std.ascii;
+import std.format;
+import std.algorithm;
+import std.uni;
+
 import dlangui;
+import fontview.ui.appdata;
 
 class UnicodeMap : VerticalLayout
 {
@@ -10,7 +16,7 @@ class UnicodeMap : VerticalLayout
         fillParent();
 
         dstring[] fontSizes;
-        foreach (size; [6, 7, 8, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 32, 36, 48, 72])
+        foreach (size; [6, 7, 8, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 32, 36, 48])
             fontSizes ~= to!dstring(size);
 
         // font size and code input
@@ -21,7 +27,7 @@ class UnicodeMap : VerticalLayout
         ComboBox sizes = new ComboBox("size", fontSizes);
         sizes.selectedItemIndex = 7;
         controls1.addChild(sizes);
-        controls1.addChild(new TextWidget(null, "Find by code"d));
+        controls1.addChild(new TextWidget(null, "Find character"d));
         EditLine codeEdit = new EditLine(null);
         controls1.addChild(codeEdit);
 
@@ -30,16 +36,17 @@ class UnicodeMap : VerticalLayout
         grid.layoutWidth(FILL_PARENT).layoutHeight(FILL_PARENT);
         grid.showColHeaders = true;
         grid.showRowHeaders = true;
-        grid.resize(16, 16);
-
-        int currentCode = 0x25e0;
+        grid.customCellAdapter = new FontViewGridCellAdapter(grid);
+        // LATER - depends on font
+        appData.genUnicodeMap();
+        grid.resize(16, appData.unicodeMap.length);
 
         for (int y = 0; y < grid.rows; y++) {
             for (int x = 0; x < grid.cols; x++) {
-                dstring res = [currentCode + 16 * y + x];
+                dstring res = [appData.unicodeMap[y] + x];
                 grid.setCellText(x, y, res);
             }
-            grid.setRowTitle(y, to!dstring(currentCode + 16 * y, 16));
+            grid.setRowTitle(y, format("%04X"d, appData.unicodeMap[y]));
         }
 
         for (int x = 0; x < grid.cols; x++) {
@@ -63,11 +70,78 @@ class UnicodeMap : VerticalLayout
             auto combo = cast(ComboBox)source;
             string size = to!string(combo.items[itemIndex]);
             grid.fontSize = to!int(size);
+            grid.autoFit();
             return true;
+        };
+
+        codeEdit.contentChange = delegate(EditableContent content) {
+            if (content.text.length == 0)
+                return;
+            else if (1 < content.text.length)
+                codeEdit.text = codeEdit.text[0 .. 1];
+            // LATER
         };
 
         addChild(controls1);
         addChild(grid);
         addChild(controls2);
+    }
+}
+
+class FontViewGridCellAdapter : CustomGridCellAdapter {
+    StringGridWidget _grid;
+    int _gridSize = 24;
+
+    this(StringGridWidget w) {
+        _grid = w;
+    }
+
+    /// return true for custom drawn cell
+    override bool isCustomCell(int col, int row) {
+        //if (col < 0 || row < 0)
+            return true;
+        //return false;
+    }
+
+    /// return cell size
+    override Point measureCell(int col, int row) {
+        _gridSize = max(24, _grid.fontSize * 2);
+        int w, h;
+        w = h = _gridSize;
+        if (col < 0)
+            w = currentTheme.fontSize * 3;
+        if (row < 0)
+            h = currentTheme.fontSize;
+        return Point(w, h);
+    }
+
+    /// draw data cell content
+    override void drawCell(DrawBuf buf, Rect rc, int col, int row) {
+        if (row < 0 && col < 0)
+            return;
+        rc.shrink(2, 1);
+        FontRef fnt;
+        if (row < 0 || col < 0)
+            fnt = currentTheme.font;
+        else
+            fnt = _grid.font;
+        if (fnt.isNull)
+            return;
+        dstring txt;
+        if (row < 0)
+            txt = _grid.colTitle(col);
+        else if (col < 0)
+            txt = _grid.rowTitle(row);
+        else
+            txt = _grid.cellText(col, row);
+        if (!txt.length)
+            return;
+        Point sz = fnt.textSize(txt);
+        Align ha = Align.HCenter;
+        if (col < 0)
+            ha = Align.Right;
+        _grid.applyAlign(rc, sz, ha, Align.VCenter);
+        uint cl = _grid.textColor;
+        fnt.drawText(buf, rc.left, rc.top, txt, cl);
     }
 }

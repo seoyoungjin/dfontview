@@ -64,11 +64,11 @@ class PangramView : ScrollWidget
             contentWidget.layoutHeight = rc.height;
 
         // approximate size of text string
-        FontRef font = FontManager.instance.getFont(36, FontWeight.Normal, false,
+        FontRef fnt = FontManager.instance.getFont(36, FontWeight.Normal, false,
                 FontFamily.Unspecified, appData.fontFace);
-        if (font.isNull)
+        if (fnt.isNull)
             return;
-        Point sz = font.textSize(appData.text());
+        Point sz = fnt.textSize(appData.text());
         contentWidget.layoutWidth = max(clientRect.width, sz.x + 20);
         contentWidget.layoutHeight = max(clientRect.height, sz.y * 9 + 100);
     }
@@ -83,9 +83,9 @@ class FontViewCanvas : CanvasWidget {
     }
 
     override void doDraw(DrawBuf buf, Rect rc) {
-        FontRef font = FontManager.instance.getFont(16, FontWeight.Normal, false,
+        FontRef fnt = FontManager.instance.getFont(16, FontWeight.Normal, false,
                 FontFamily.Unspecified, appData.fontFace);
-        if (font.isNull) {
+        if (fnt.isNull) {
             Log.d("Failed to getFont ", appData.fontFace);
             return;
         }
@@ -95,30 +95,30 @@ class FontViewCanvas : CanvasWidget {
         // face name
         int y = rc.top; 
         dstring text1 = to!dstring(appData.fontFace);
-        font.drawText(buf, rc.left, y, text1, textColor, 4, 0, textFlags);
+        fnt.drawText(buf, rc.left, y, text1, textColor, 4, 0, textFlags);
 
         // contents
-        font = FontManager.instance.getFont(12, FontWeight.Normal, false,
+        fnt = FontManager.instance.getFont(12, FontWeight.Normal, false,
                 FontFamily.Unspecified, appData.fontFace);
-        if (font.isNull)
+        if (fnt.isNull)
             return;
 
-        y += font.height + 20;
-        font.drawText(buf, rc.left, y, "abcdefghjklmnopqrstuvwxyz"d, textColor);
-        y += font.height;
-        font.drawText(buf, rc.left, y, "ABCDEFGHJKLMNOPQRSTUVWXYZ"d, textColor);
-        y += font.height;
-        font.drawText(buf, rc.left, y, "0123456789%2.:,;(*!?')"d, textColor);
-        y += font.height;
+        y += fnt.height + 20;
+        fnt.drawText(buf, rc.left, y, "abcdefghjklmnopqrstuvwxyz"d, textColor);
+        y += fnt.height;
+        fnt.drawText(buf, rc.left, y, "ABCDEFGHJKLMNOPQRSTUVWXYZ"d, textColor);
+        y += fnt.height;
+        fnt.drawText(buf, rc.left, y, "0123456789%2.:,;(*!?')"d, textColor);
+        y += fnt.height;
 
         y += 20;
         foreach (size; [8, 9, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36]) {
-            font = FontManager.instance.getFont(size, FontWeight.Normal, false,
+            fnt = FontManager.instance.getFont(size, FontWeight.Normal, false,
                     FontFamily.Unspecified, appData.fontFace);
-            if (font.isNull)
+            if (fnt.isNull)
                 continue;
-            font.drawText(buf, rc.left, y, text, textColor);
-            y += font.height + 5;
+            fnt.drawText(buf, rc.left, y, text, textColor);
+            y += fnt.height + 5;
         }
     }
 }
