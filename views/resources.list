@@ -1,7 +1,6 @@
 res/theme_custom.xml
 res/i18n/en.ini
 res/i18n/ko.ini
-res/mdpi/view-list.png
-res/mdpi/view-grid.png
-res/mdpi/about.png
-
+res/hdpi/bold-icon.png
+res/hdpi/italic-icon.png
+res/hdpi/settings.png

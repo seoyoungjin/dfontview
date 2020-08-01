@@ -22,10 +22,14 @@ I started this project to test i18n feature of DLangUI library.
   - Ligature? (HarpBuzz)
 - Unicode map
   - tooltip
+  - font and unicode range check
+  - not usable unicode area
 - Font Property (`font_info.py` or `ftdump.py` in freetype-py/example)
 - Noto Color Emoji
-  - howto resize in fontmanager
+  - howto resize in gtk fontmanager
 - Refer Nexusfont, TFT Font Viewer
+- Setting
+- Family and File relation
 
 Screen Shot
 -----------

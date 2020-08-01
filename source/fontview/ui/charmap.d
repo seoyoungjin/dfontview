@@ -75,16 +75,25 @@ class UnicodeMap : VerticalLayout
         };
 
         codeEdit.contentChange = delegate(EditableContent content) {
+            // Log.d("contentChange text = ", content.text);
             if (content.text.length == 0)
                 return;
             if (1 < content.text.length)
                 codeEdit.text = codeEdit.text[0 .. 1];
             int code = codeEdit.text[0];
             int row = appData.unicodeMapIndex(code);
-            // LATER BUG? - row and col differs 1
+            int col = code & 1;
+            // LATER - row and col differs 1?
             if (row != -1)
-                grid.selectCell((code & 15) + 1, row + 1);
+                grid.selectCell(col + 1, row + 1);
         };
+
+        // codeEdit.keyEvent = delegate(Widget source, KeyEvent event) {
+        //     Log.d("keyEvent code = ", event.keyCode, " action =", event.action);
+        //     if (event.keyCode == KeyCode.DEL || event.keyCode == KeyCode.BACK)
+        //         return false;
+        //     return true;
+        // };
 
         // Callback for handling of cell double click or Enter key press
         grid.cellActivated = delegate(GridWidgetBase source, int col, int row) {

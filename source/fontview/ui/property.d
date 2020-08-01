@@ -1,9 +1,6 @@
 module fontview.ui.property;
 
-import std.stdio;
-import std.string;
-import std.conv : to;
-import std.utf;
+import fontview.ui.appdata;
 
 import dlangui;
 

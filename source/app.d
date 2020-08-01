@@ -27,7 +27,7 @@ extern (C) int UIAppMain(string[] args)
 
     // create window
     Window window = Platform.instance.createWindow("D FontView", null,
-            WindowFlag.Resizable, 800, 600);
+            WindowFlag.Resizable, 700, 600);
 
     auto frame = new FontViewFrame();
 
