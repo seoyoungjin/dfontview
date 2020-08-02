@@ -1,29 +1,35 @@
 module fontview.ui.frame;
 
-import dlangui.widgets.widget;
-import dlangui.widgets.menu;
-import dlangui.widgets.tabs;
+import std.path;
+
+import dlangui.core.stdaction;
+import dlangui.dialogs.dialog;
 import dlangui.widgets.appframe;
-import dlangui.widgets.docks;
+import dlangui.widgets.widget;
+import dlangui.widgets.tabs;
 import dlangui.widgets.layouts;
 import dlangui.widgets.toolbars;
 import dlangui.widgets.controls;
+
+import fontview.ui.appdata;
+import fontview.ui.settings;
+import fontview.ui.settingsdlg;
 
 // action codes
 enum Actions : int {
     BrowseView = 10000,
     ListView,
     GridView,
-    HelpAbout,
     Bold,
     Italic,
-    Settings
+    Settings,
+    HelpAbout
 }
 
 // actions
 const Action ACTION_BOLD = new Action(Actions.Bold, "Bold"d, "bold-icon"c);
 const Action ACTION_ITALIC = new Action(Actions.Italic, "Italic"d, "italic-icon"c);
-const Action ACTION_SETTINGS = new Action(Actions.Settings, "Settings"d, "settings"c);
+const Action ACTION_SETTINGS = new Action(Actions.Settings, "Settings"d, "setting"c);
 // const Action ACTION_BROWSE_VIEW = new Action(Actions.BrowseView, "Browse"d, "browseview"c);
 // const Action ACTION_VIEW_LIST = new Action(Actions.ListView, "List View"d, "view-list"c);
 // const Action ACTION_VIEW_GRID = new Action(Actions.GridView, "Grid View"d, "view-grid"c);
@@ -31,6 +37,16 @@ const Action ACTION_SETTINGS = new Action(Actions.Settings, "Settings"d, "settin
 
 class FontViewFrame : AppFrame
 {
+    FontViewSettings _settings; 
+
+    override protected void initialize() {
+        _settings = new FontViewSettings(buildNormalizedPath(settingsDir, "settings.json"));
+        _settings.load();
+        _settings.updateDefaults();
+        _settings.save();
+        super.initialize();
+    }
+
     /// create app body widget
     override protected Widget createBody() {
         auto bodyWidget = new HorizontalLayout();
@@ -42,36 +58,51 @@ class FontViewFrame : AppFrame
     /// create app toolbars
     override protected ToolBarHost createToolbars() {
         ToolBarHost res = new ToolBarHost();
-        ToolBar tb = res.getOrAddToolbar("Standard");
+        ToolBar tb = res.getOrAddToolbar("Pangram");
 
-        auto btnBold = new ToolBarImageCheckButton(ACTION_BOLD);
-        tb.addChild(btnBold);
-        auto btnItalic = new ToolBarImageCheckButton(ACTION_ITALIC);
-        tb.addChild(btnItalic);
+        auto btnBold = new ToolBarImageCheckButton(ACTION_BOLD).id("action-bold");
+        auto btnItalic = new ToolBarImageCheckButton(ACTION_ITALIC).id("action-italic");
+        tb.addControl(btnBold);
+        tb.addControl(btnItalic);
         tb.addButtons(ACTION_SEPARATOR);
 
         tb.addButtons(ACTION_SETTINGS);
-                      // ACTION_VIEW_,
-                      // ACTION_VIEW_LIST,
-                      // ACTION_VIEW_GRID,
+
         return res;
     }
 
-    /// override to handle specific actions state (e.g. change enabled state for supported actions)
-    override bool handleActionStateRequest(const Action a) {
+    /// override to handle specific actions
+    override bool handleAction(const Action a) {
         switch (a.id) {
         case Actions.Bold:
-            auto w = toolbars.child(0);
-            // w.checked = true;
+            auto w = toolbars.childById("action-bold");
+            if (w.checked == true)
+                appData.weight = FontWeight.Bold;
+            else
+                appData.weight = FontWeight.Normal;
             return true;
         case Actions.Italic:
+            auto w = toolbars.childById("action-italic");
+            appData.italic = (w.checked == true);
             return true;
         case Actions.Settings:
-            a.state = ACTION_STATE_ENABLED;
+            showPreferences();
             return true;
         default:
-            return super.handleActionStateRequest(a);
+            return super.handleAction(a);
         }
+    }
+
+    void showPreferences() {
+        FontViewSettings s = _settings.clone();
+        SettingsDialog dlg = new SettingsDialog(this, s);
+        dlg.dialogResult = delegate(Dialog dlg, const Action result) {
+            if (result.id == ACTION_APPLY.id) {
+                _settings.applySettings(s.setting);
+                _settings.save();
+            }
+        };
+        dlg.show();
     }
 }
 
@@ -79,8 +110,10 @@ class FontViewFrame : AppFrame
 class ToolBarImageCheckButton : ImageCheckButton {
     this(const Action a) {
         super(a);
+
         styleId = STYLE_TOOLBAR_BUTTON;
         focusable = false;
     }
+
     mixin ActionTooltipSupport;
 }

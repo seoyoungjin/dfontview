@@ -76,6 +76,17 @@ extern (C) int UIAppMain(string[] args)
     fontList.selectItem(0);
     fontList.itemSelected.emit(fontList, 0);
 
+    tabs.tabChanged = delegate(string newTabId, string prevTabId) {
+        if (newTabId is "pangram") {
+            frame.toolbars.childById("action-bold").enabled = true;
+            frame.toolbars.childById("action-italic").enabled = true;
+        }
+        else {
+            frame.toolbars.childById("action-bold").enabled = false;
+            frame.toolbars.childById("action-italic").enabled = false;
+        }
+    };
+
     window.mainWidget = frame;
 
     // show window

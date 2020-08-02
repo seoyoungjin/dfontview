@@ -19,9 +19,9 @@ I started this project to test i18n feature of DLangUI library.
 ## TODO
 
 - Text View
-  - Ligature? (HarpBuzz)
+  - Ligature? (HarfBuzz)
 - Unicode map
-  - tooltip
+  - ~~~tooltip~~~
   - font and unicode range check
   - not usable unicode area
 - Font Property (`font_info.py` or `ftdump.py` in freetype-py/example)

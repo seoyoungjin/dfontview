@@ -4,7 +4,7 @@ import std.algorithm;
 import std.conv : to;
 import std.utf;
 
-import dlangui;
+import dlangui.graphics.fonts;
 
 class AppData {
     // text to draw in pangram
@@ -12,19 +12,19 @@ class AppData {
     const dstring pangramTextKo = "다람쥐 헌 쳇바퀴에 타고파. 1234567890"d;
     dstring userText;
 
-    dstring text()
-    {
+    dstring text() {
         if (userText.length > 0)
             return userText;
         return pangramText;
     }
 
+    FontWeight weight = FontWeight.Normal;
+    bool italic = false;
     string fontFace;
     dstring[] faces;
 
     // get sorted font list
-    dstring[] getFontFaces()
-    {
+    dstring[] getFontFaces() {
         if (faces == null) {
             FontFaceProps[] faceProps = FontManager.instance.getFaces();
             Log.i("Number of Font Faces : ", faceProps.length);

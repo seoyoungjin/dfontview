@@ -82,7 +82,7 @@ class UnicodeMap : VerticalLayout
                 codeEdit.text = codeEdit.text[0 .. 1];
             int code = codeEdit.text[0];
             int row = appData.unicodeMapIndex(code);
-            int col = code & 1;
+            int col = code & 0x000f;
             // LATER - row and col differs 1?
             if (row != -1)
                 grid.selectCell(col + 1, row + 1);

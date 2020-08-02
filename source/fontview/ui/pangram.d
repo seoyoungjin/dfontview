@@ -64,7 +64,7 @@ class PangramView : ScrollWidget
             contentWidget.layoutHeight = rc.height;
 
         // approximate size of text string
-        FontRef fnt = FontManager.instance.getFont(36, FontWeight.Normal, false,
+        FontRef fnt = FontManager.instance.getFont(36, appData.weight, appData.italic,
                 FontFamily.Unspecified, appData.fontFace);
         if (fnt.isNull)
             return;
@@ -83,7 +83,7 @@ class FontViewCanvas : CanvasWidget {
     }
 
     override void doDraw(DrawBuf buf, Rect rc) {
-        FontRef fnt = FontManager.instance.getFont(16, FontWeight.Normal, false,
+        FontRef fnt = FontManager.instance.getFont(16, appData.weight, appData.italic,
                 FontFamily.Unspecified, appData.fontFace);
         if (fnt.isNull) {
             Log.d("Failed to getFont ", appData.fontFace);
@@ -98,7 +98,7 @@ class FontViewCanvas : CanvasWidget {
         fnt.drawText(buf, rc.left, y, text1, textColor, 4, 0, textFlags);
 
         // contents
-        fnt = FontManager.instance.getFont(12, FontWeight.Normal, false,
+        fnt = FontManager.instance.getFont(12, appData.weight, appData.italic,
                 FontFamily.Unspecified, appData.fontFace);
         if (fnt.isNull)
             return;
@@ -113,7 +113,7 @@ class FontViewCanvas : CanvasWidget {
 
         y += 20;
         foreach (size; [8, 9, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36]) {
-            fnt = FontManager.instance.getFont(size, FontWeight.Normal, false,
+            fnt = FontManager.instance.getFont(size, appData.weight, appData.italic,
                     FontFamily.Unspecified, appData.fontFace);
             if (fnt.isNull)
                 continue;
