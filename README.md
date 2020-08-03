@@ -18,25 +18,26 @@ I started this project to test i18n feature of DLangUI library.
 
 ## TODO
 
-- Text View
+- Pangram View
   - Ligature? (HarfBuzz)
 - Unicode map
-  - ~~~tooltip~~~
+  - indivisual character information
   - font and unicode range check
   - not usable unicode area
 - Font Property (`font_info.py` or `ftdump.py` in freetype-py/example)
 - Noto Color Emoji
   - howto resize in gtk fontmanager
-- Refer Nexusfont, TFT Font Viewer
-- Setting
+- Refer Nexusfont, gtk font manager
+- [x] Setting
 - Family and File relation
+- BeamUI porting
 
 Screen Shot
 -----------
 
 ## Linux
 
-![2002-07-20](https://seoyoungjin.github.com/screenshot/dfontview/20200730_pangram.png)
+![2002-07-20](https://seoyoungjin.github.com/screenshot/dfontview/20200803.png)
 
 ## Windows
 
