@@ -37,13 +37,15 @@ Screen Shot
 
 ## Linux
 
-![2002-07-20](https://seoyoungjin.github.com/screenshot/dfontview/20200803.png)
+- verion 0.1 (2020-08-03)
+
+![2020-08-03](https://seoyoungjin.github.com/screenshot/dfontview/20200803.png)
 
 ## Windows
 
-Face name with current locale - OEM charset
+- Face name with current locale - OEM charset
 
-![2002-07-16](https://seoyoungjin.github.com/screenshot/dfontview/20200716_gungseo_win.png)
+![2020-07-16](https://seoyoungjin.github.com/screenshot/dfontview/20200716_gungseo_win.png)
 
 Blog
 ----
